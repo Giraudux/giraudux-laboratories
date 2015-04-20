@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <apr_general.h>
 #include <apr_network_io.h>
+#include <apr_thread_pool.h>
 
 void print_error(apr_status_t err_code)
 {
@@ -23,15 +24,9 @@ void exit_error(apr_status_t err_code)
 	exit(EXIT_FAILURE);
 }
 
-void socket_opt_set(apr_socket_t * sock, apr_int32_t opt, apr_int32_t on)
+void * session_thread(apr_thread_t * thread, void * param)
 {
-	apr_status_t status = apr_socket_opt_set(sock, opt, on);
-	if(status != APR_SUCCESS)
-		exit_error(status);
-}
-
-void session(apr_socket_t * sock)
-{
+	apr_socket_t * sock = param;
 	apr_size_t buf_len = 64;
 	char buf[64];
 	apr_status_t status_recv,
@@ -60,25 +55,32 @@ void session(apr_socket_t * sock)
 
 
 	apr_socket_close(sock);
+
+	return NULL;
 }
 
 void server(apr_port_t port)
 {
 	apr_status_t status;
-	apr_pool_t * pool;
+	apr_pool_t * mem_pool;
+	apr_thread_pool_t * thr_pool;
 	apr_socket_t * sock,
 	             * new_sock;
 	apr_sockaddr_t * sockaddr;
 
-	status = apr_pool_create(&pool, NULL);
+	status = apr_pool_create(&mem_pool, NULL);
 	if(status != APR_SUCCESS)
 		exit_error(status);
 
-	status = apr_sockaddr_info_get(&sockaddr, NULL, APR_UNSPEC, port, 0, pool);
+	status = apr_thread_pool_create(&thr_pool, 2, 2, mem_pool);
 	if(status != APR_SUCCESS)
 		exit_error(status);
 
-	status = apr_socket_create(&sock, sockaddr->family, SOCK_STREAM, APR_PROTO_TCP, pool);
+	status = apr_sockaddr_info_get(&sockaddr, NULL, APR_UNSPEC, port, 0, mem_pool);
+	if(status != APR_SUCCESS)
+		exit_error(status);
+
+	status = apr_socket_create(&sock, sockaddr->family, SOCK_STREAM, APR_PROTO_TCP, mem_pool);
 	if(status != APR_SUCCESS)
 		exit_error(status);
 
@@ -92,14 +94,17 @@ void server(apr_port_t port)
 
 	while(1)
 	{
-		status = apr_socket_accept(&new_sock, sock, pool);
+		status = apr_socket_accept(&new_sock, sock, mem_pool);
 		if(status != APR_SUCCESS)
 			exit_error(status);
 
-		session(new_sock);
+		status = apr_thread_pool_push(thr_pool, session_thread, new_sock, APR_THREAD_TASK_PRIORITY_NORMAL, NULL);
+		if(status != APR_SUCCESS)
+			exit_error(status);
 	}
 
-	apr_pool_destroy(pool);
+	apr_thread_pool_destroy(thr_pool);
+	apr_pool_destroy(mem_pool);
 }
 
 int main(int argc, char const *argv[])
