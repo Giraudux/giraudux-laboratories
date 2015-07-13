@@ -1,62 +1,60 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="ASCII">
-		<title>Realtime Demo</title>
-		<style>
-			canvas {
-				border: 1px solid black;
-			}
-		</style>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script> 
-		<script src="/socket.io/socket.io.js"></script>
-		<script>
-			$( document ).ready(function () {
-				var socket, canvas, players_data;
+  <head>
+    <meta charset="ASCII">
+    <title>Realtime Demo</title>
+    <style>
+      canvas {
+        border: 1px solid black;
+      }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script> 
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      $( document ).ready(function () {
+        var socket, players_data, ctx;
 
-				players_data = null;
-				canvas = $( "#canvas" );
-				socket = io(location.host);
+        players_data = null;
+        socket = io(location.host);
+        ctx = document.getElementById("canvas").getContext("2d");
 
-				$( document ).keypress(function(event) {
-					console.log("keypress: "+event.key);
-					switch(event.keyCode) {
-						case 37: socket.emit("left"); break; // left
-						case 39: socket.emit("right"); break; // right
-					}
-				});
+        $( document ).keypress(function(event) {
+          console.log("keypress: "+event.key);
+          switch(event.keyCode) {
+            case 37: socket.emit("left"); break; // left
+            case 39: socket.emit("right"); break; // right
+          }
+        });
 
-				socket.on("init", function (data) {
-					console.log(JSON.stringify(data));
-				});
+        socket.on("init", function (data) {
+          console.log(JSON.stringify(data));
+        });
 
-				socket.on("update", function (data) {
-					console.log(JSON.stringify(data));
-					var id, ctx;
-					if(players_data == null) {
-						for(id in data) {
-							ctx = document.getElementById("canvas").getContext("2d");
-							ctx.beginPath();
-							ctx.arc(data[id].x, data[id].y, 8, 0, 2*Math.PI);
-							ctx.stroke();
-						}
-					} else {
-						for(id in data) {
-							if(players_data.hasOwnProperty(id)) {
-								ctx = document.getElementById("canvas").getContext("2d");
-								ctx.moveTo(players_data[id].x, players_data[id].y);
-								ctx.lineTo(data[id].x, data[id].y);
-								ctx.stroke();
-							}
-						}
-					}
-					players_data = data;
-				});
-			});
-		</script>
-	</head>
-	<body>
-		 <canvas id="canvas" width="800" height="600"></canvas> 
-	</body>
+        socket.on("update", function (data) {
+          console.log(JSON.stringify(data));
+          var id;
+          if(players_data == null) {
+            for(id in data) {
+              ctx.beginPath();
+              ctx.arc(data[id].x, data[id].y, 8, 0, 2*Math.PI);
+              ctx.stroke();
+            }
+          } else {
+            for(id in data) {
+              if(players_data.hasOwnProperty(id)) {
+                ctx.moveTo(players_data[id].x, players_data[id].y);
+                ctx.lineTo(data[id].x, data[id].y);
+                ctx.stroke();
+              }
+            }
+          }
+          players_data = data;
+        });
+      });
+    </script>
+  </head>
+  <body>
+     <canvas id="canvas" width="800" height="600"></canvas> 
+  </body>
 </html>
 <!-- Alexis Giraudet 2015 -->
