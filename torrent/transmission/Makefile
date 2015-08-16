@@ -6,7 +6,6 @@ export PATH := $(workspace)/local/bin:$(PATH)
 all: pkg-config expat xml-parser zlib intltool gettext openssl curl libevent transmission
 
 curl:
-	wget https://github.com/bagder/curl/releases/download/curl-7_43_0/curl-7.43.0.tar.gz && \
 	tar -xf curl-7.43.0.tar.gz && \
 	cd curl-7.43.0 && \
 	./configure --prefix=$(workspace)/local --enable-shared=no \
@@ -18,7 +17,6 @@ curl:
 	make install
 
 expat:
-	wget http://downloads.sourceforge.net/project/expat/expat/2.1.0/expat-2.1.0.tar.gz && \
 	tar -xf expat-2.1.0.tar.gz && \
 	cd expat-2.1.0 && \
 	./configure --prefix=$(workspace)/local \
@@ -30,7 +28,6 @@ expat:
 	make install
 
 gettext:
-	wget http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.5.1.tar.gz && \
 	tar -xf gettext-0.19.5.1.tar.gz && \
 	cd gettext-0.19.5.1 && \
 	./configure --prefix=$(workspace)/local --enable-shared=no \
@@ -42,7 +39,6 @@ gettext:
 	make install
 
 intltool:
-	wget https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz && \
 	tar -xf intltool-0.51.0.tar.gz && \
 	cd intltool-0.51.0 && \
 	./configure --prefix=$(workspace)/local \
@@ -55,7 +51,6 @@ intltool:
 	make install
 
 libevent:
-	wget http://sourceforge.net/projects/levent/files/libevent/libevent-2.0/libevent-2.0.22-stable.tar.gz && \
 	tar -xf libevent-2.0.22-stable.tar.gz && \
 	cd libevent-2.0.22-stable && \
 	./configure --prefix=$(workspace)/local --enable-shared=no \
@@ -67,7 +62,6 @@ libevent:
 	make install
 
 openssl:
-	wget https://www.openssl.org/source/openssl-1.0.2d.tar.gz && \
 	tar -xf openssl-1.0.2d.tar.gz && \
 	cp $(workspace)/local/include/z*.h openssl-1.0.2d/include && \
 	cd openssl-1.0.2d && \
@@ -79,7 +73,6 @@ openssl:
 	make install
 
 pkg-config:
-	wget http://pkgconfig.freedesktop.org/releases/pkg-config-0.28.tar.gz && \
 	tar -xf pkg-config-0.28.tar.gz && \
 	cd pkg-config-0.28 && \
 	./configure --with-internal-glib --prefix=$(workspace)/local && \
@@ -87,7 +80,6 @@ pkg-config:
 	make install
 
 transmission:
-	wget http://download.transmissionbt.com/files/transmission-2.84.tar.xz && \
 	tar -xf transmission-2.84.tar.xz && \
 	cd transmission-2.84 && \
 	./configure --prefix=$(workspace)/local \
@@ -101,7 +93,6 @@ transmission:
 	make install
 
 xml-parser:
-	wget http://search.cpan.org/CPAN/authors/id/T/TO/TODDR/XML-Parser-2.44.tar.gz && \
 	tar -xf XML-Parser-2.44.tar.gz && \
 	cd XML-Parser-2.44 && \
 	perl Makefile.PL PREFIX=$(workspace)/local \
@@ -111,12 +102,23 @@ xml-parser:
 	make install
 
 zlib:
-	wget http://zlib.net/zlib-1.2.8.tar.gz && \
 	tar -xf zlib-1.2.8.tar.gz && \
 	cd zlib-1.2.8 && \
 	./configure --prefix=$(workspace)/local --static && \
 	make && \
 	make install
+
+download:
+	wget https://github.com/bagder/curl/releases/download/curl-7_43_0/curl-7.43.0.tar.gz && \
+	wget http://downloads.sourceforge.net/project/expat/expat/2.1.0/expat-2.1.0.tar.gz && \
+	wget http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.5.1.tar.gz && \
+	wget https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz && \
+	wget http://sourceforge.net/projects/levent/files/libevent/libevent-2.0/libevent-2.0.22-stable.tar.gz && \
+	wget https://www.openssl.org/source/openssl-1.0.2d.tar.gz && \
+	wget http://pkgconfig.freedesktop.org/releases/pkg-config-0.28.tar.gz && \
+	wget http://download.transmissionbt.com/files/transmission-2.84.tar.xz && \
+	wget http://search.cpan.org/CPAN/authors/id/T/TO/TODDR/XML-Parser-2.44.tar.gz && \
+	wget http://zlib.net/zlib-1.2.8.tar.gz
 
 clean:
 	-rm -rf local
